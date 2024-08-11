@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use super::keyphrases::{handle_if, handle_let_assignment, handle_return, handle_throw};
-use super::math_expr::evaluate_expression;
+use super::math_expr::{evaluate_expression, parse_expression};
 use super::values::expressions::Expression;
 use super::values::variables::Variables;
 
@@ -30,7 +30,6 @@ pub fn parse_expression_file(input: &str) -> Variables {
 }
 
 pub fn handle_line(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
-    let last_line = lines.last().unwrap_or(&"").to_owned();
     if line.starts_with("let") {
         handle_let_assignment(line, variables);
     } else if line.starts_with(";") {
@@ -39,7 +38,7 @@ pub fn handle_line(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
         handle_throw(line, variables);
     } else if line.starts_with("???") {
         handle_if(line, variables, &lines)
-    }
+    } 
 }
 
 

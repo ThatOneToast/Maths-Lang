@@ -1,71 +1,102 @@
-
-
 use crate::parser::{math_expr::{evaluate_condition, evaluate_expression, parse_expression}, parser::handle_line};
 
 use super::values::{expressions::Expression, variables::Variables};
 
 
-
 pub fn handle_if(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
-    
-    fn execute_block(block: &[&str], variables: &mut Variables, lines: &Vec<&str>) {
+    fn execute_block(block: &Vec<String>, variables: &mut Variables, lines: &Vec<&str>) {
         for line in block {
             handle_line(line, variables, lines);
         }
     }
-    
+
     // Extract the condition from the line
     let condition_start = line.find('(').expect("Missing '(' in if statement") + 1;
     let condition_end = line.find(')').expect("Missing ')' in if statement");
     let condition_str = &line[condition_start..condition_end].trim();
 
     // Parse the condition expression
-    let condition_expr = parse_expression(condition_str)
-        .expect("Invalid condition expression");
+    let condition_expr = parse_expression(condition_str).expect("Invalid condition expression");
 
-   let condition_bool = evaluate_condition(&condition_expr, variables)
-        .expect("Error evaluating condition");
-   
-       let mut block_start_index = 0;
-       for (index, line) in lines.iter().enumerate() {
-           if line.contains('{') {
-               block_start_index = index + 1;
-               break;
-           }
-       }
-       let true_block_end_index = lines[block_start_index..]
-           .iter()
-           .position(|&line| line.trim() == "}")
-           .map(|pos| pos + block_start_index)
-           .expect("Missing '}' in if statement");
-   
-       // check the line of the end true block for a !!! {
-       if lines[true_block_end_index].contains("!!!") {
-           let false_block_start_index = lines[true_block_end_index..]
-               .iter()
-               .position(|&line| line.trim() == "!!!")
-               .map(|pos| pos + true_block_end_index)
-               .expect("Missing '!!!' in if statement");
-           
-           let false_block_end_index = lines[false_block_start_index..]
-               .iter()
-               .position(|&line| line.trim() == "}")
-               .map(|pos| pos + false_block_start_index)
-               .expect("Missing '}' in if statement");
-           
-           let false_block = &lines[false_block_start_index..false_block_end_index];
-           
-           if !condition_bool {
-               execute_block(false_block, variables, lines);
-           }
-           
-       }
-       
-       let true_block = &lines[block_start_index..true_block_end_index];
-       if condition_bool {
-           execute_block(true_block, variables, lines);
-       } 
+    if !(condition_expr.is_less_than() || condition_expr.is_more_than()) {
+        panic!("Condition expression is not a boolean result => {}", condition_str);
+    }
+
+    let condition_bool = evaluate_condition(&condition_expr, variables).expect("Error evaluating condition");
+
+    println!("Condition Boolean: {}", condition_bool);
+    
+    let mut line_index = lines.iter().position(|line| line == &line.to_owned()).expect("Line not found") + 1;
+    
+    let mut next_line = lines.get(line_index).unwrap_or(&"");
+    let mut contents: Vec<String> = Vec::new();
+    let mut else_contents: Vec<String> = Vec::new();
+
+    while !next_line.contains("}") {
+        // remove everything before the { if there is one2
+        let mut line = next_line.to_string();
+        if let Some(index) = line.find("{") {
+            line = line[index + 1..].to_string();
+        }
+        contents.push(line);
+        line_index += 1;
+        next_line = lines.get(line_index).unwrap_or(&"");
+        if line_index >= lines.len() {
+            panic!("Reached end of input without finding closing '}}'");
+        }
+    }
+
+    // Handle the closing brace
+    if next_line.contains("} !!!"){
+        line_index += 1;
+        next_line = lines.get(line_index).unwrap_or(&"");
+        
+        println!("There is an else block");
+        
+        while !next_line.contains("}") {
+            else_contents.push(next_line.to_string());
+            line_index += 1;
+            next_line = lines.get(line_index).unwrap_or(&"");
+            if line_index >= lines.len() {
+                panic!("Reached end of input without finding closing '}}' for else block");
+            }
+        }
+        
+    } 
+
+    println!("Block: {:?}", contents);
+
+    if condition_bool {
+        execute_block(&contents, variables, lines);
+    } else {
+        if !else_contents.is_empty() {
+            execute_block(&else_contents, variables, lines);
+        } else {
+            panic!("No else block found");
+        }
+    }
 }
+
+fn handle_else_block(line_index: usize, lines: &Vec<&str>) -> Result<Vec<String>, String> {
+    let mut line_index = line_index;
+    let mut contents: Vec<String> = Vec::new();
+
+    let mut next_line = lines.get(line_index).unwrap_or(&"");
+
+    while !next_line.contains("}") {
+        contents.push(next_line.to_string());
+        line_index += 1;
+        next_line = lines.get(line_index).unwrap_or(&"");
+        if line_index >= lines.len() {
+            return Err("Reached end of input without finding closing '}' for else block".to_string());
+        }
+    }
+
+    Ok(contents)
+}
+
+
+
 
 pub fn handle_let_assignment(line: &str, variables: &mut Variables) {
     let parts: Vec<&str> = line.split('=').collect();
@@ -73,31 +104,41 @@ pub fn handle_let_assignment(line: &str, variables: &mut Variables) {
         let var_name = parts[0].trim().replace("let", "").trim().to_string();
         let expr_str = parts[1].trim().to_string();
 
-        let expression = parse_expression(&expr_str)
-            .expect(&format!("Invalid expression: {}", expr_str));
+        let expression =
+            parse_expression(&expr_str).expect(&format!("Invalid expression: {}", expr_str));
 
         if expression.is_math() {
-            let evaluated_value = evaluate_expression(&expression, variables)
-                .expect("Error evaluating expression");
+            let evaluated_value =
+                evaluate_expression(&expression, variables).expect("Error evaluating expression");
             if !evaluated_value.is_number() {
                 panic!("Invalid expression: {}", expr_str);
             }
-            variables.expr_vars.insert(var_name, Expression::Number(evaluated_value.as_number().unwrap()));
+            variables.expr_vars.insert(
+                var_name,
+                Expression::Number(evaluated_value.as_number().unwrap()),
+            );
         } else if expression.is_less_than() || expression.is_more_than() {
-            let evaluated_value = evaluate_expression(&expression, variables)
-                .expect("Error evaluating expression");
-            
+            let evaluated_value =
+                evaluate_expression(&expression, variables).expect("Error evaluating expression");
+
             if !evaluated_value.is_boolean() {
-                panic!("Invalid expression: {} - `<` and `>` can only be used with boolean values", expr_str);
-            } 
-            variables.expr_vars.insert(var_name, Expression::Boolean(evaluated_value.as_boolean().unwrap()));
-        }
-        else if expression.is_string() {
+                panic!(
+                    "Invalid expression: {} - `<` and `>` can only be used with boolean values",
+                    expr_str
+                );
+            }
+            variables.expr_vars.insert(
+                var_name,
+                Expression::Boolean(evaluated_value.as_boolean().unwrap()),
+            );
+        } else if expression.is_string() {
             let value = expression.as_string().expect("Invalid string expression");
             variables.string_vars.insert(var_name, value);
         } else if expression.is_number() {
             let value = expression.as_number().expect("Invalid number expression");
-            variables.expr_vars.insert(var_name, Expression::Number(value));
+            variables
+                .expr_vars
+                .insert(var_name, Expression::Number(value));
         } else if expression.is_variable() {
             let var_name = expression.variable_name().unwrap().to_string();
             if let Some(value) = variables.expr_vars.get(&var_name) {
@@ -145,13 +186,20 @@ pub fn handle_return(line: &str, variables: &mut Variables, last_line: &str) {
     if !line.ends_with(";") && last_line == line {
         if let Some(value) = variables.expr_vars.get(&var_name) {
             let value = evaluate_expression(value, variables).expect("Error evaluating expression");
-            variables.expr_vars.insert("result".to_string(), Expression::Number(value.as_number().unwrap()));
+            variables.expr_vars.insert(
+                "result".to_string(),
+                Expression::Number(value.as_number().unwrap()),
+            );
         } else {
             panic!("Undefined variable: {}", var_name);
         }
     } else if line.ends_with(";") {
         if let Some(value) = variables.expr_vars.get(&var_name) {
-            println!("{} ( Terminated Early ): {:?}", &var_name, evaluate_expression(value, variables));
+            println!(
+                "{} ( Terminated Early ): {:?}",
+                &var_name,
+                evaluate_expression(value, variables)
+            );
             // Early exit
             return;
         } else {

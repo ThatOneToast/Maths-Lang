@@ -167,37 +167,24 @@ fn parse_factor<'a, I>(tokens: &mut std::iter::Peekable<I>,) -> Result<Expressio
 pub fn evaluate_condition(condition_value: &Expression, variables: &Variables) -> Result<bool, String> {
     match condition_value {
         Expression::LessThan(left, right) => {
-            let left_value = evaluate_expression(left, variables)
-                .map_err(|e| format!("Error evaluating left expression: {}", e))?;
-            let right_value = evaluate_expression(right, variables)
-                .map_err(|e| format!("Error evaluating right expression: {}", e))?;
-
-            let left_eval = left_value.as_number()
-                .expect("Left side of comparison is not a number");
+            let less_than = Expression::LessThan(left.clone(), right.clone());
+            let value = evaluate_expression(&less_than, variables)
+                    .expect("Error evaluating condition");
             
-            let right_eval = right_value.as_number()
-                .expect("Right side of comparison is not a number");
-            
-            Ok(left_eval < right_eval)
+            Ok(value.as_boolean().expect("Condition is not a boolean"))
             
         }
 
         Expression::MoreThan(left, right) => {
-            let left_value = evaluate_expression(left, variables)
-                .map_err(|e| format!("Error evaluating left expression: {}", e))?;
-            let right_value = evaluate_expression(right, variables)
-                .map_err(|e| format!("Error evaluating right expression: {}", e))?;
-
-            let left_eval = left_value.as_number()
-                .expect("Left side of comparison is not a number");
+            let more_than = Expression::MoreThan(left.clone(), right.clone());
+            let value = evaluate_expression(&more_than, variables)
+                    .expect("Error evaluating condition");
             
-            let right_eval = right_value.as_number()
-                .expect("Right side of comparison is not a number");
-            
-            Ok(left_eval > right_eval)
+            Ok(value.as_boolean().expect("Condition is not a boolean"))
         }
 
         Expression::Boolean(value) => Ok(*value),
+        
 
         _ => Err("Not a proper condition format".to_string()),
     }

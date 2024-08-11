@@ -108,5 +108,20 @@ impl Expression {
         matches!(self, Expression::MoreThan(_, _))
     }
     
+    pub fn to_string(&self) -> String {
+        match self {
+            Expression::Add(left, right) => format!("{} + {}", left.to_string(), right.to_string()),
+            Expression::Subtract(left, right) => format!("{} - {}", left.to_string(), right.to_string()),
+            Expression::Multiply(left, right) => format!("{} * {}", left.to_string(), right.to_string()),
+            Expression::Divide(left, right) => format!("{} / {}", left.to_string(), right.to_string()),
+            Expression::Power(left, right) => format!("{} ^ {}", left.to_string(), right.to_string()),
+            Expression::Number(num) => format!("{}", num),
+            Expression::Boolean(value) => format!("{}", value),
+            Expression::Variable(var) => var.clone(),
+            Expression::LessThan(left, right) => format!("{} < {}", left.to_string(), right.to_string()),
+            Expression::MoreThan(left, right) => format!("{} > {}", left.to_string(), right.to_string()),
+        }
+    }
+    
 
 }

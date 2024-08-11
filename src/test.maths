@@ -1,9 +1,12 @@
 
 
-??? (50 > 30) {
+let result = 50
+
+
+??? (result < 30) {
     let result = 1
 } !!! {
-    let result = 50
+    let result = 2
 }
 
 
