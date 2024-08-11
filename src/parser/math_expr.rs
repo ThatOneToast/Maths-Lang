@@ -5,32 +5,24 @@ use std::str::FromStr;
 pub fn evaluate_expression(expr: &Expression, variables: &Variables) -> Result<Box<Expression>, String> {
     match expr {
         Expression::Add(left, right) => {
-            if left.is_number() && right.is_number() {
-                Ok(Box::new(Expression::Number(evaluate_expression(left, variables)?.as_number().unwrap() + evaluate_expression(right, variables)?.as_number().unwrap())))
-            } else {
-                Err("Invalid operands for addition".to_string())
-            }
+            let left_value = evaluate_expression(left, variables).unwrap();
+            let right_value = evaluate_expression(right, variables).unwrap();
+            Ok(Box::new(Expression::Number(left_value.as_number().unwrap() + right_value.as_number().unwrap())))
         }
         Expression::Subtract(left, right) => {
-            if left.is_number() && right.is_number() {
-                Ok(Box::new(Expression::Number(evaluate_expression(left, variables)?.as_number().unwrap() - evaluate_expression(right, variables)?.as_number().unwrap())))
-            } else {
-                Err("Invalid operands for subtraction".to_string())
-            }
+            let left_value = evaluate_expression(left, variables).unwrap();
+            let right_value = evaluate_expression(right, variables).unwrap();
+            Ok(Box::new(Expression::Number(left_value.as_number().unwrap() - right_value.as_number().unwrap())))
         }
         Expression::Multiply(left, right) => {
-            if left.is_number() && right.is_number() {
-                Ok(Box::new(Expression::Number(evaluate_expression(left, variables)?.as_number().unwrap() * evaluate_expression(right, variables)?.as_number().unwrap())))
-            } else {
-                Err("Invalid operands for multiplication".to_string())
-            }
+            let left_value = evaluate_expression(left, variables).unwrap();
+            let right_value = evaluate_expression(right, variables).unwrap();
+            Ok(Box::new(Expression::Number(left_value.as_number().unwrap() * right_value.as_number().unwrap())))
         }
         Expression::Divide(left, right) => {
-            if left.is_number() && right.is_number() {
-                Ok(Box::new(Expression::Number(evaluate_expression(left, variables)?.as_number().unwrap() / evaluate_expression(right, variables)?.as_number().unwrap())))
-            } else {
-                Err("Invalid operands for division".to_string())
-            }
+            let left_value = evaluate_expression(left, variables).unwrap();
+            let right_value = evaluate_expression(right, variables).unwrap();
+            Ok(Box::new(Expression::Number(left_value.as_number().unwrap() / right_value.as_number().unwrap())))
         }
         Expression::Power(left, right) => {
             if left.is_number() && right.is_number() {

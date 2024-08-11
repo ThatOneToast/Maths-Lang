@@ -1,14 +1,13 @@
 
+let som1 = 7
+let som2 = 43
+let som3 = 4
 
-let result = 50
-
-
-??? (result < 30) {
-    let result = 1
+let result = som1 - som2 - som3
+??? (result < 0) {
+    throw Negative Result! $result
 } !!! {
-    let result = 2
+    throw positive result! $result
 }
-
-
 
 ;result

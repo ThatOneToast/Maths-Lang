@@ -178,7 +178,6 @@ pub fn handle_throw(line: &str, variables: &mut Variables) {
 
     // Join all message parts with spaces and format the final message
     error_message = message_parts.join(" ");
-    println!("Thrown error line: {}\nMessage: {}", line, error_message);
 }
 
 pub fn handle_return(line: &str, variables: &mut Variables, last_line: &str) {
