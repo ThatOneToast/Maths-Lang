@@ -1,6 +1,10 @@
 
 
-??? (30 > 10) { let result = 10 }
+??? (50 > 30) {
+    let result = 1
+} !!! {
+    let result = 50
+}
 
 
 

@@ -30,6 +30,16 @@ impl Expression {
     }
 
     pub fn as_number(&self) -> Option<f64> {
+        
+        // if its a boolean return 1 for true and 0 for false
+        if let Expression::Boolean(value) = self {
+            if *value {
+                return Some(1.0);
+            } else {
+                return Some(0.0);
+            }
+        }
+        
         if let Expression::Number(num) = self {
             Some(*num)
         } else {
@@ -55,6 +65,10 @@ impl Expression {
         } else {
             None
         }
+    }
+    
+    pub fn is_boolean(&self) -> bool {
+        matches!(self, Expression::Boolean(_))
     }
 
     pub fn is_variable(&self) -> bool {
