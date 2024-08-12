@@ -1,7 +1,9 @@
-use crate::parser::{math_expr::{evaluate_condition, evaluate_expression, parse_expression}, parser::handle_line};
+use crate::parser::{
+    math_expr::{evaluate_condition, evaluate_expression, parse_expression},
+    parser::handle_line,
+};
 
 use super::values::{expressions::Expression, variables::Variables};
-
 
 pub fn handle_if(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
     fn execute_block(block: &Vec<String>, variables: &mut Variables, lines: &Vec<&str>) {
@@ -10,30 +12,36 @@ pub fn handle_if(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
         }
     }
 
-    // Extract the condition from the line
     let condition_start = line.find('(').expect("Missing '(' in if statement") + 1;
     let condition_end = line.find(')').expect("Missing ')' in if statement");
     let condition_str = &line[condition_start..condition_end].trim();
-
-    // Parse the condition expression
     let condition_expr = parse_expression(condition_str).expect("Invalid condition expression");
 
-    if !(condition_expr.is_less_than() || condition_expr.is_more_than()) {
-        panic!("Condition expression is not a boolean result => {}", condition_str);
+    if !(condition_expr.is_less_than() 
+        || condition_expr.is_more_than() 
+        || condition_expr.is_equals()
+    ) {
+        panic!(
+            "Condition expression is not a boolean result => {}",
+            condition_str
+        );
     }
 
     let condition_bool = evaluate_condition(&condition_expr, variables).expect("Error evaluating condition");
 
     println!("Condition Boolean: {}", condition_bool);
-    
-    let mut line_index = lines.iter().position(|line| line == &line.to_owned()).expect("Line not found") + 1;
-    
+
+    let mut line_index = lines
+        .iter()
+        .position(|line| line == &line.to_owned())
+        .expect("Line not found")
+        + 1;
+
     let mut next_line = lines.get(line_index).unwrap_or(&"");
     let mut contents: Vec<String> = Vec::new();
     let mut else_contents: Vec<String> = Vec::new();
 
     while !next_line.contains("}") {
-        // remove everything before the { if there is one2
         let mut line = next_line.to_string();
         if let Some(index) = line.find("{") {
             line = line[index + 1..].to_string();
@@ -47,12 +55,10 @@ pub fn handle_if(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
     }
 
     // Handle the closing brace
-    if next_line.contains("} !!!"){
+    if next_line.contains("} !!!") {
         line_index += 1;
         next_line = lines.get(line_index).unwrap_or(&"");
-        
-        println!("There is an else block");
-        
+
         while !next_line.contains("}") {
             else_contents.push(next_line.to_string());
             line_index += 1;
@@ -61,10 +67,7 @@ pub fn handle_if(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
                 panic!("Reached end of input without finding closing '}}' for else block");
             }
         }
-        
     } 
-
-    println!("Block: {:?}", contents);
 
     if condition_bool {
         execute_block(&contents, variables, lines);
@@ -76,26 +79,6 @@ pub fn handle_if(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
         }
     }
 }
-
-fn handle_else_block(line_index: usize, lines: &Vec<&str>) -> Result<Vec<String>, String> {
-    let mut line_index = line_index;
-    let mut contents: Vec<String> = Vec::new();
-
-    let mut next_line = lines.get(line_index).unwrap_or(&"");
-
-    while !next_line.contains("}") {
-        contents.push(next_line.to_string());
-        line_index += 1;
-        next_line = lines.get(line_index).unwrap_or(&"");
-        if line_index >= lines.len() {
-            return Err("Reached end of input without finding closing '}' for else block".to_string());
-        }
-    }
-
-    Ok(contents)
-}
-
-
 
 
 pub fn handle_let_assignment(line: &str, variables: &mut Variables) {
@@ -117,7 +100,9 @@ pub fn handle_let_assignment(line: &str, variables: &mut Variables) {
                 var_name,
                 Expression::Number(evaluated_value.as_number().unwrap()),
             );
-        } else if expression.is_less_than() || expression.is_more_than() {
+        } else if expression.is_less_than() 
+            || expression.is_more_than() 
+            || expression.is_equals() {
             let evaluated_value =
                 evaluate_expression(&expression, variables).expect("Error evaluating expression");
 
@@ -153,31 +138,28 @@ pub fn handle_let_assignment(line: &str, variables: &mut Variables) {
 }
 
 pub fn handle_throw(line: &str, variables: &mut Variables) {
-    // Remove "throw"
     let string = line.replace("throw ", "");
     let string_parts = string.split_whitespace().collect::<Vec<&str>>();
 
     let mut message_parts = Vec::new();
-    let mut error_message = String::new();
 
     for part in string_parts {
         if part.starts_with("$") {
             let var_name = part.trim().replace("$", "").trim().to_string();
             if let Some(value) = variables.expr_vars.get(&var_name) {
-                // Format the variable value and add to the message parts
                 let evaluated_value = evaluate_expression(value, variables);
                 message_parts.push(format!("{}: {:?}", var_name, evaluated_value));
             } else {
                 panic!("Undefined variable: {}", var_name);
             }
         } else {
-            // Append non-variable parts of the message
             message_parts.push(part.to_string());
         }
     }
 
-    // Join all message parts with spaces and format the final message
-    error_message = message_parts.join(" ");
+    let message = message_parts.join(" ");
+    println!("Thrown: {}", message);
+
 }
 
 pub fn handle_return(line: &str, variables: &mut Variables, last_line: &str) {

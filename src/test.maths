@@ -1,13 +1,9 @@
 
-let som1 = 7
-let som2 = 43
-let som3 = 4
 
-let result = som1 - som2 - som3
-??? (result < 0) {
-    throw Negative Result! $result
+??? (7 == 5) {
+    let result = 5
+    throw result is $result
 } !!! {
-    throw positive result! $result
+    let result = 0
+    throw result is not 5 its $result
 }
-
-;result

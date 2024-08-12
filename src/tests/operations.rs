@@ -1,11 +1,7 @@
-
-
-
 #[cfg(test)]
 mod operations {
     use crate::parser::parser::{calculate_sequence, parse_expression_file};
 
-    
     #[test]
     fn add() {
         let maths = r"
@@ -13,12 +9,12 @@ mod operations {
             
             ;addition
             ";
-        
+
         let mut sequence = parse_expression_file(maths);
         let calculation = calculate_sequence(&mut sequence);
         assert_eq!(calculation.as_number().unwrap(), 100.0);
     }
-    
+
     #[test]
     fn subtract() {
         let maths = r"
@@ -26,12 +22,12 @@ mod operations {
             
             ;subtraction
             ";
-        
+
         let mut sequence = parse_expression_file(maths);
         let calculation = calculate_sequence(&mut sequence);
         assert_eq!(calculation.as_number().unwrap(), 0.0);
     }
-    
+
     #[test]
     fn multiply() {
         let maths = r"
@@ -39,12 +35,12 @@ mod operations {
             
             ;multiplication
             ";
-        
+
         let mut sequence = parse_expression_file(maths);
         let calculation = calculate_sequence(&mut sequence);
         assert_eq!(calculation.as_number().unwrap(), 2500.0);
     }
-    
+
     #[test]
     fn divide() {
         let maths = r"
@@ -52,12 +48,12 @@ mod operations {
             
             ;division
             ";
-        
+
         let mut sequence = parse_expression_file(maths);
         let calculation = calculate_sequence(&mut sequence);
         assert_eq!(calculation.as_number().unwrap(), 1.0);
     }
-    
+
     #[test]
     fn power() {
         let maths = r"
@@ -65,12 +61,12 @@ mod operations {
             
             ;power
             ";
-        
+
         let mut sequence = parse_expression_file(maths);
         let calculation = calculate_sequence(&mut sequence);
         assert_eq!(calculation.as_number().unwrap(), 25.0);
     }
-    
+
     #[test]
     fn less_than() {
         let maths = r"
@@ -78,12 +74,12 @@ mod operations {
             
             ;less_than
             ";
-        
+
         let mut sequence = parse_expression_file(maths);
         let calculation = calculate_sequence(&mut sequence);
         assert_eq!(calculation.as_number().unwrap(), 0.0);
     }
-    
+
     #[test]
     fn more_than() {
         let maths = r"
@@ -91,10 +87,9 @@ mod operations {
             
             ;more_than
             ";
-        
+
         let mut sequence = parse_expression_file(maths);
         let calculation = calculate_sequence(&mut sequence);
         assert_eq!(calculation.as_number().unwrap(), 1.0);
     }
-
 }
