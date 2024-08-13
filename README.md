@@ -7,10 +7,10 @@ and calculations.
 
 * Variable Assignment: Using the `let` keyword create variables that can store expressions or values.
 * Your Basic Math: Your standard symbols for math `*, +, ^` etc.
-** Conditional Statements: Using `???` to create a if block that stores a condition
+* Conditional Statements: Using `???` to create a if block that stores a condition
   A condition `<, >, ==` what if it's false? use the `!!!` else operator.
 * Printing: Using `throw` you can print any string and variables using the variable reference symbol `$`
-** Returning: Maths has to ways of returning a final result. `;<variable_name>` is the final statement in your maths file.
+* Returning: Maths has to ways of returning a final result. `;<variable_name>` is the final statement in your maths file.
    `;result` cannot be used to terminate a value early. `;result` must be at the end of the file. 
    Use `;result;` to return early disregarding 
   
