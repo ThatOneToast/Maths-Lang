@@ -53,10 +53,10 @@ mod phrases {
             ??? (5 == 5) {
                 let result = 5
             } !!! {
-                result = 0
+                let result = 0
             }
             
-            ;return
+            ;result
             ";
         
         let result = mini_interpreter(&maths).unwrap().as_number()
