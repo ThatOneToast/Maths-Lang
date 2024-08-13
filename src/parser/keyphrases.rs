@@ -55,7 +55,7 @@ pub fn handle_if(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
     }
 
     // Handle the closing brace
-    if next_line.contains("} !!!") {
+    if next_line.contains("} !!!") || next_line.contains("} else") {
         line_index += 1;
         next_line = lines.get(line_index).unwrap_or(&"");
 
@@ -83,6 +83,7 @@ pub fn handle_if(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
 
 pub fn handle_let_assignment(line: &str, variables: &mut Variables) {
     let parts: Vec<&str> = line.split('=').collect();
+    
     if parts.len() == 2 {
         let var_name = parts[0].trim().replace("let", "").trim().to_string();
         let expr_str = parts[1].trim().to_string();
@@ -148,7 +149,20 @@ pub fn handle_throw(line: &str, variables: &mut Variables) {
             let var_name = part.trim().replace("$", "").trim().to_string();
             if let Some(value) = variables.expr_vars.get(&var_name) {
                 let evaluated_value = evaluate_expression(value, variables);
-                message_parts.push(format!("{}: {:?}", var_name, evaluated_value));
+                match evaluated_value {
+                    Ok(value) => {
+                        if let Some(number) = value.as_number() {
+                            message_parts.push(format!("{}[{:?}]", var_name, number));
+                        } else {
+                            if let Some(string) = value.as_string() {
+                                message_parts.push(format!("{}: {:?}", var_name, string));
+                            } else {
+                                panic!("Bad throw {}", line)
+                            }
+                        }
+                    },
+                    Err(_) => todo!(),
+                }
             } else {
                 panic!("Undefined variable: {}", var_name);
             }
@@ -158,11 +172,11 @@ pub fn handle_throw(line: &str, variables: &mut Variables) {
     }
 
     let message = message_parts.join(" ");
-    println!("Thrown: {}", message);
+    println!("[Maths]  {}", message);
 
 }
 
-pub fn handle_return(line: &str, variables: &mut Variables, last_line: &str) {
+pub fn handle_return(line: &str, variables: &mut Variables, last_line: &str) -> Result<f64, String> {
     let var_name = line.trim().replace(";", "").trim().to_string();
     if !line.ends_with(";") && last_line == line {
         if let Some(value) = variables.expr_vars.get(&var_name) {
@@ -171,8 +185,9 @@ pub fn handle_return(line: &str, variables: &mut Variables, last_line: &str) {
                 "result".to_string(),
                 Expression::Number(value.as_number().unwrap()),
             );
+            return Ok(value.as_number().unwrap())
         } else {
-            panic!("Undefined variable: {}", var_name);
+            return Err("Undefined variable".to_string())
         }
     } else if line.ends_with(";") {
         if let Some(value) = variables.expr_vars.get(&var_name) {
@@ -181,10 +196,19 @@ pub fn handle_return(line: &str, variables: &mut Variables, last_line: &str) {
                 &var_name,
                 evaluate_expression(value, variables)
             );
-            // Early exit
-            return;
+            return Ok(value.as_number().unwrap())
         } else {
-            panic!("Undefined variable: {}", var_name);
+            return Err("No variable detected".to_string())
         }
+    } else if !line.ends_with(";") && last_line != line {
+        let message = format!("
+            EOF Return type not allowed here.
+            Use early terminate return by putting another `;` at the end of your return statement.
+            Line: {}
+            ", line);
+        
+        return Err(message)
     }
+    
+    Err("Something bad went wrong".to_string())
 }

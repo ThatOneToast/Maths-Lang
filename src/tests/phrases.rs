@@ -1,10 +1,10 @@
 
 #[cfg(test)]
 mod phrases {
-    use crate::parser::{self, math_expr::evaluate_expression, values::expressions::Expression};
+    use crate::parser::{self, values::expressions::Expression};
 
 
-    fn mini_interpreter(input: &str) -> Result<(Box<Expression>), String> {
+    fn mini_interpreter(input: &str) -> Result<Box<Expression>, String> {
         let mut variables = parser::parser::parse_expression_file(input);
         let calculated_eval = parser::parser::calculate_sequence(&mut variables);
         
@@ -16,12 +16,9 @@ mod phrases {
         let maths = r"
             let result = 50
             
-            
             ??? (result > 30) {
                 let result = 1
-            } 
-            
-            
+            }
             
             ;result
             ";
@@ -51,18 +48,16 @@ mod phrases {
     
     #[test]
     fn equals_condition() {
-        let maths = format!("
-            let result = 0
+        let maths = r"
             
-            let num = 5
-            ??? (num == 5) {{
+            ??? (5 == 5) {
                 let result = 5
-            }} !!! {{
-                let result = 10
-            }}
+            } !!! {
+                result = 0
+            }
             
-            ;result
-        ");
+            ;return
+            ";
         
         let result = mini_interpreter(&maths).unwrap().as_number()
             .expect("Failed converting final result to a number");

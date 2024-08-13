@@ -92,4 +92,17 @@ mod operations {
         let calculation = calculate_sequence(&mut sequence);
         assert_eq!(calculation.as_number().unwrap(), 1.0);
     }
+    
+    #[test]
+    fn equals() {
+        let maths = r"
+            let equals = 5 equals 5
+            
+            ;equals
+            ";
+        
+        let mut sequence = parse_expression_file(maths);
+        let calculation = calculate_sequence(&mut sequence);
+        assert_eq!(calculation.as_number().unwrap(), 1.0);
+    }
 }

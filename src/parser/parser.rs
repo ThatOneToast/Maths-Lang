@@ -18,7 +18,20 @@ pub fn parse_expression_file(input: &str) -> Variables {
         .collect::<Vec<&str>>();
 
     for line in &lines {
-        handle_line(line, &mut variables, &lines);
+        if line.starts_with(";") || line.ends_with(";") {
+            let return_value = handle_return(line, &mut variables, lines.last().unwrap_or(&""));
+            
+            match return_value {
+                Ok(_) => {
+                    break;
+                }
+                Err(value) => {
+                    panic!("{:?}", value)
+                }
+            }
+        } else {
+            handle_line(line, &mut variables, &lines)
+        };
     }
 
     Variables {
@@ -30,11 +43,9 @@ pub fn parse_expression_file(input: &str) -> Variables {
 pub fn handle_line(line: &str, variables: &mut Variables, lines: &Vec<&str>) {
     if line.starts_with("let") {
         handle_let_assignment(line, variables);
-    } else if line.starts_with(";") {
-        handle_return(line, variables, lines.last().unwrap_or(&""));
-    } else if line.starts_with("throw") {
+    } else if line.starts_with("throw") || line.starts_with("!"){
         handle_throw(line, variables);
-    } else if line.starts_with("???") {
+    } else if line.starts_with("???") || line.starts_with("if") {
         handle_if(line, variables, &lines)
     }
 }
@@ -48,5 +59,5 @@ pub fn calculate_sequence(sequence: &mut Variables) -> Box<Expression> {
         return evaluate_expression(expr, &variables).expect("Error evaluating expression");
     }
 
-    Box::new(Expression::Number(0.0)) // Return 0 if 'result' is not defined
+    Box::new(Expression::Variable(format!("No result provided")))
 }

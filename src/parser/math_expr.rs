@@ -156,7 +156,7 @@ where
                 let rhs = parse_factor(tokens)?;
                 Expression::LessThan(Box::new(lhs), Box::new(rhs))
             }
-            "==" => {
+            "equals" => {
                 tokens.next();
                 let rhs = parse_factor(tokens)?;
                 Expression::Equals(Box::new(lhs), Box::new(rhs))

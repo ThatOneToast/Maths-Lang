@@ -1,9 +1,10 @@
 
 
-??? (7 == 5) {
-    let result = 5
-    throw result is $result
-} !!! {
-    let result = 0
-    throw result is not 5 its $result
+
+
+if (1 equals 1) {
+    ! true statement here
+} else {
+    ! false statement here
 }
+
