@@ -7,6 +7,9 @@ enum Token {
     Minus,
     Multiply,
     Divide,
+    LessThan,
+    GreaterThan,
+    EqualToo,
     Power,
     LParen,
     RParen,
@@ -19,11 +22,22 @@ fn tokenize(input: &str) -> Vec<Token> {
     while let Some(ch) = chars.next() {
         match ch {
             ' ' => continue,
-            '=' => continue,
             '+' => tokens.push(Token::Plus),
             '-' => tokens.push(Token::Minus),
             '*' => tokens.push(Token::Multiply),
             '/' => tokens.push(Token::Divide),
+            '>' => tokens.push(Token::GreaterThan),
+            '<' => tokens.push(Token::LessThan),
+            '=' => {
+                if let Some(next_ch) = chars.peek() {
+                    if next_ch.to_owned() == '=' {
+                        tokens.push(Token::EqualToo);
+                        chars.next();
+                    }
+                } else {
+                    continue
+                }
+            }
             '^' => tokens.push(Token::Power),
             '(' => tokens.push(Token::LParen),
             ')' => tokens.push(Token::RParen),
@@ -45,8 +59,35 @@ fn tokenize(input: &str) -> Vec<Token> {
 }
 
 fn parse_expression(tokens: &[Token]) -> (f64, &[Token]) {
-    parse_add_sub(tokens)
+    parse_comparison(tokens)  // Start by parsing comparison expressions
 }
+
+fn parse_comparison(tokens: &[Token]) -> (f64, &[Token]) {
+    let (mut value, mut tokens) = parse_add_sub(tokens);  // Parse the arithmetic expressions first
+
+    while let Some(token) = tokens.first() {
+        match token {
+            Token::GreaterThan => {
+                let (rhs, rest) = parse_add_sub(&tokens[1..]);
+                value = if value > rhs { 1.0 } else { 0.0 };  // 1.0 for true, 0.0 for false
+                tokens = rest;
+            }
+            Token::LessThan => {
+                let (rhs, rest) = parse_add_sub(&tokens[1..]);
+                value = if value < rhs { 1.0 } else { 0.0 };
+                tokens = rest;
+            }
+            Token::EqualToo => {
+                let (rhs, rest) = parse_add_sub(&tokens[1..]);
+                value = if value == rhs { 1.0 } else { 0.0 };
+                tokens = rest;
+            }
+            _ => break,
+        }
+    }
+    (value, tokens)
+}
+
 
 fn parse_add_sub(tokens: &[Token]) -> (f64, &[Token]) {
     let (mut value, mut tokens) = parse_mul_div(tokens);
@@ -105,6 +146,7 @@ fn parse_primary(tokens: &[Token]) -> (f64, &[Token]) {
                 _ => panic!("Mismatched parentheses"),
             }
         }
+
         _ => panic!("Unexpected token"),
     }
 }
