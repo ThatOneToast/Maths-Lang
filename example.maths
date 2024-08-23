@@ -1,9 +1,7 @@
-#[height, width, length]
 
+let height = 10
+let width = 10
+let length = 10
+let result = @Volume(height,width,length)
 
-
-;height
-;width
-;length
-
-let result = height * width * length
+;result

@@ -1,5 +1,7 @@
 #[cfg(test)]
 pub mod tests {
+    use std::collections::HashMap;
+
 
     #[test]
     fn addition() {
@@ -9,7 +11,7 @@ pub mod tests {
             ;result
             "#;
 
-        let mut test_file_parser = crate::parser::Parser::new(test_file);
+        let mut test_file_parser = crate::parser::Parser::new(test_file, None);
         test_file_parser.parse();
 
         assert_eq!(
@@ -26,7 +28,7 @@ pub mod tests {
             ;result
             "#;
 
-        let mut test_file_parser = crate::parser::Parser::new(test_file);
+        let mut test_file_parser = crate::parser::Parser::new(test_file, None);
         test_file_parser.parse();
 
         assert_eq!(
@@ -43,7 +45,7 @@ pub mod tests {
             ;result
             "#;
 
-        let mut test_file_parser = crate::parser::Parser::new(test_file);
+        let mut test_file_parser = crate::parser::Parser::new(test_file, None);
         test_file_parser.parse();
 
         assert_eq!(
@@ -60,7 +62,7 @@ pub mod tests {
             ;result
             "#;
 
-        let mut test_file_parser = crate::parser::Parser::new(test_file);
+        let mut test_file_parser = crate::parser::Parser::new(test_file, None);
         test_file_parser.parse();
 
         assert_eq!(
@@ -77,7 +79,7 @@ pub mod tests {
             ;result
             "#;
 
-        let mut test_file_parser = crate::parser::Parser::new(test_file);
+        let mut test_file_parser = crate::parser::Parser::new(test_file, None);
         test_file_parser.parse();
 
         assert_eq!(
@@ -99,7 +101,7 @@ pub mod tests {
             ;result
             "#;
 
-        let mut test_file_parser = crate::parser::Parser::new(test_file.trim());
+        let mut test_file_parser = crate::parser::Parser::new(test_file.trim(), None);
         test_file_parser.parse();
 
         assert_eq!(
@@ -122,7 +124,7 @@ pub mod tests {
 
             "#;
 
-        let mut test_file_parser = crate::parser::Parser::new(test_file.trim());
+        let mut test_file_parser = crate::parser::Parser::new(test_file.trim(), None);
         test_file_parser.parse();
 
         assert_eq!(
@@ -140,14 +142,41 @@ let result = height * width * length
 ;result
 "#;
 
-        let mut test_file_parser = crate::parser::Parser::new(test_file.trim());
+        let mut test_file_parser = crate::parser::Parser::new(test_file.trim(), None);
         
-        let params = test_file_parser.get_paramater_names();
+        let params = test_file_parser.get_paramater_names().unwrap();
         
         for param in params {
             test_file_parser.var_container.numbers.insert(param.to_string(), 10.0);
         }
         
+        test_file_parser.parse();
+
+        assert_eq!(
+            test_file_parser.var_container.get_number("result").unwrap(),
+            &1000.0
+        );
+    }
+    
+    #[test]
+    fn function() {
+        let test_file = r#"
+let height = 10
+let width = 10
+let length = 10
+            
+let result = @Volume(height,width,length)
+            
+;result
+            "#;
+        
+        let patterns = HashMap::from([
+            ("Volume".to_string(), r#"#[height, width, length]
+                let result = height * width * length
+                "#.to_string())
+        ]);
+
+        let mut test_file_parser = crate::parser::Parser::new(test_file, Option::from(patterns));
         test_file_parser.parse();
 
         assert_eq!(
