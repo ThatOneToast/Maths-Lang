@@ -13,6 +13,31 @@ and calculations.
    
 ## Examples 📝
 
+- Context Parameters:
+```maths
+#[height, width, length]
+let result = height * width * length
+
+;result
+```
+Pass the paramaters in by arguments in the cli
+
+- Conditional Statements:
+```maths
+let cond1 = 60
+let cond2 = 30
+
+if cond1 > cond2 {
+    let result = 1
+} else {
+    let result = 0
+}
+
+;result
+```
+
+
+
 
 ## PS
 
