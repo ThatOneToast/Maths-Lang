@@ -10,6 +10,7 @@ pub struct Parser<'a> {
     pub var_container: VariableContainer,
 }
 
+
 impl<'a> Parser<'a> {
     pub fn new(contents: &'a str) -> Self {
         Self {
@@ -17,6 +18,14 @@ impl<'a> Parser<'a> {
             var_container: VariableContainer::new(),
         }
     }
+    
+    pub fn get_value_of(&self, var_name: &str) -> Option<f64> {
+        match self.var_container.numbers.get(var_name) {
+            Some(value) => Some(*value),
+            None => None,
+        }
+    }
+    
 
     fn is_let_statement(&self, line: &str, tokens: Vec<&str>) -> bool {
         let first_token = tokens.get(0).unwrap_or(&"");
@@ -42,22 +51,29 @@ impl<'a> Parser<'a> {
     }
 
     fn evaluate_condition(&self, condition_tokens: &[&str], num_vars: &HashMap<String, f64>) -> bool {
-        let final_tokens = condition_tokens.into_iter()
+        let final_tokens = condition_tokens
+            .into_iter()
             .map(|token| {
                 if self.is_variable(token.to_owned()) {
                     format!("{}", *num_vars.get(token.to_owned()).unwrap())
                 } else {
                     token.to_string()
                 }
-            }
-        ).collect::<Vec<String>>();
-            
-        
+            })
+            .collect::<Vec<String>>();
+
         println!("Condition tokens: {:?}", final_tokens);
-        
+
         let expression = final_tokens.join(" ");
         let result = evaluate_expression(&expression);
-        result > 0.0 // Assuming your evaluate_expression returns a number, treat > 0 as true
+        
+        if result == 1.0 {
+            true
+        } else if result == 0.0 {
+            false
+        } else {
+            panic!("Unexpected result from evaluate_expression: {}", result)
+        }
     }
 
     fn parse_line(&mut self, line: &str) {
@@ -104,14 +120,12 @@ impl<'a> Parser<'a> {
             if line.starts_with("if") || line.starts_with("???") {
                 let condition_tokens = &tokens[1..tokens.len() - 1];
                 let condition_met = self.evaluate_condition(condition_tokens, &self.var_container.numbers);
-                println!("Condition met: {}", condition_met);
 
                 let mut true_block_lines = Vec::new();
                 let mut false_block_lines = Vec::new();
                 let mut in_false_block = false;
 
                 while let Some(block_line) = lines_iter.next() {
-                    println!("Block line: {}", block_line);
                     let block_line_trimmed = block_line.trim();
                     if block_line_trimmed == "}" {
                         if in_false_block {
@@ -119,33 +133,45 @@ impl<'a> Parser<'a> {
                         } else {
                             continue;
                         }
-                    }
-                    if block_line_trimmed.starts_with("else") 
-                        || block_line_trimmed.starts_with("!!!") 
+                    } 
+                    
+                    
+                    if block_line_trimmed.starts_with("else {")
+                        || block_line_trimmed.starts_with("!!!")
                         || block_line_trimmed.starts_with("} else {")
                     {
                         in_false_block = true;
                         
+                        println!("Current line: {}", lines_iter.peek().unwrap());
+
                         if let Some(next_line) = lines_iter.next() {
-                            println!("Next line: {}", next_line);
+                            println!("Next line: {}", next_line.trim());
                             if next_line.trim() == "{" {
                                 continue;
                             } else if next_line.trim() == "}" {
                                 break;
-                            } 
+                            }
+                            
                         }
                     }
-                
+
                     if in_false_block {
+                        
+                        if block_line.trim() == "} else {" {
+                            continue;
+                        }
+                        
+                        println!("False block line: {}", block_line);
                         false_block_lines.push(block_line);
                     } else {
+                        println!("True block line: {}", block_line);
                         true_block_lines.push(block_line);
                     }
                 }
-
-
+                
                 println!("True block: {:?}", true_block_lines.join(" ").trim());
                 println!("False block: {:?}", false_block_lines.join(" ").trim());
+
 
                 if condition_met {
                     if true_block_lines.is_empty() {

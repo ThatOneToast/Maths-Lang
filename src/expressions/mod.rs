@@ -35,7 +35,7 @@ fn tokenize(input: &str) -> Vec<Token> {
                         chars.next();
                     }
                 } else {
-                    continue
+                    continue;
                 }
             }
             '^' => tokens.push(Token::Power),
@@ -59,17 +59,17 @@ fn tokenize(input: &str) -> Vec<Token> {
 }
 
 fn parse_expression(tokens: &[Token]) -> (f64, &[Token]) {
-    parse_comparison(tokens)  // Start by parsing comparison expressions
+    parse_comparison(tokens) // Start by parsing comparison expressions
 }
 
 fn parse_comparison(tokens: &[Token]) -> (f64, &[Token]) {
-    let (mut value, mut tokens) = parse_add_sub(tokens);  // Parse the arithmetic expressions first
+    let (mut value, mut tokens) = parse_add_sub(tokens); // Parse the arithmetic expressions first
 
     while let Some(token) = tokens.first() {
         match token {
             Token::GreaterThan => {
                 let (rhs, rest) = parse_add_sub(&tokens[1..]);
-                value = if value > rhs { 1.0 } else { 0.0 };  // 1.0 for true, 0.0 for false
+                value = if value > rhs { 1.0 } else { 0.0 }; // 1.0 for true, 0.0 for false
                 tokens = rest;
             }
             Token::LessThan => {
@@ -87,7 +87,6 @@ fn parse_comparison(tokens: &[Token]) -> (f64, &[Token]) {
     }
     (value, tokens)
 }
-
 
 fn parse_add_sub(tokens: &[Token]) -> (f64, &[Token]) {
     let (mut value, mut tokens) = parse_mul_div(tokens);
