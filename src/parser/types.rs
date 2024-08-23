@@ -9,7 +9,9 @@ impl VariableContainer {
         let mut nums = HashMap::new();
         nums.insert("restult".to_string(), 0.0);
 
-        Self { numbers: nums }
+        Self { 
+            numbers: nums, 
+        }
     }
 
     pub fn get_number(&self, key: &str) -> Option<&f64> {

@@ -1,0 +1,9 @@
+#[height, width, length]
+
+
+
+;height
+;width
+;length
+
+let result = height * width * length

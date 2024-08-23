@@ -19,6 +19,32 @@ impl<'a> Parser<'a> {
         }
     }
     
+    pub fn get_paramater_names(&self) -> Vec<String> {
+        let lines = self.contents.lines().collect::<Vec<&str>>();
+        let first = lines.get(0).unwrap_or(&"");
+        
+        if first.starts_with("#[") {
+            let params_string = first.strip_prefix("#[").unwrap_or("").strip_suffix("]").unwrap_or("");
+            let params = params_string.split(",").collect::<Vec<&str>>();
+            
+            
+            let new_params = params
+                .iter()
+                .map(|s| s.trim().to_string())
+                .collect::<Vec<String>>();
+            
+
+            new_params
+            
+        } else {
+            panic!("This maths doesn't contain any context of paramaters");
+        }
+        
+    }
+    
+  
+    
+    #[allow(dead_code)]
     pub fn get_value_of(&self, var_name: &str) -> Option<f64> {
         match self.var_container.numbers.get(var_name) {
             Some(value) => Some(*value),
@@ -108,14 +134,20 @@ impl<'a> Parser<'a> {
                 .expect(&format!("Undefined variable: {} Line: {}", var_name, line));
 
             println!("{}: {}", var_name, var_value);
-        }
+        } 
     }
+    
+
 
     pub fn parse(&mut self) {
         let mut lines_iter = self.contents.lines().peekable();
 
         while let Some(line) = lines_iter.next() {
             let tokens: Vec<&str> = line.split_whitespace().collect();
+            
+            if line.starts_with("#") {
+                continue;
+            }
 
             if line.starts_with("if") || line.starts_with("???") {
                 let condition_tokens = &tokens[1..tokens.len() - 1];
@@ -180,12 +212,14 @@ impl<'a> Parser<'a> {
                         self.parse_line(block_line);
                     }
                 }
-            } else {
+            } 
+            
+            else {
                 self.parse_line(line);
             }
         }
 
-        let result_value = self.var_container.get_number("result").unwrap();
+        let result_value = self.var_container.get_number("result").unwrap_or(&0.0);
         println!("Result: {}", result_value);
     }
 }

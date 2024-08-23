@@ -3,18 +3,17 @@
 Maths is a simple expressive language for performing mathmatical operations
 and calculations. 
 
-## --  Features
+## Features ⚡️
 
 * Variable Assignment: Using the `let` keyword create variables that can store expressions or values.
+* Context Parameters: Using `#[paramater1, paramater2]` at the top of your maths file, you can pass in parameters to your maths expression..
 * Your Basic Math: Your standard symbols for math `*, +, ^` etc.
-* Conditional Statements: Using `???` to create a if block that stores a condition
-  A condition `<, >, ==` what if it's false? use the `!!!` else operator.
-* Printing: Using `throw` you can print any string and variables using the variable reference symbol `$`
-* Returning: Maths has to ways of returning a final result. `;<variable_name>` is the final statement in your maths file.
-   `;result` cannot be used to terminate a value early. `;result` must be at the end of the file. 
-   Use `;result;` to return early disregarding 
-  
+* Conditional Statements: Using `???` or `if` to create an if block that takes in a condition.
+* Print out a variables value by using `;` followed by the variable name.
    
+## Examples 📝
+
+
 ## PS
 
 * This is still in early stages. I am new to rust, and just trying to learn the way.
