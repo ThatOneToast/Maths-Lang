@@ -142,10 +142,8 @@ impl<'a> Parser<'a> {
                     {
                         in_false_block = true;
                         
-                        println!("Current line: {}", lines_iter.peek().unwrap());
 
                         if let Some(next_line) = lines_iter.next() {
-                            println!("Next line: {}", next_line.trim());
                             if next_line.trim() == "{" {
                                 continue;
                             } else if next_line.trim() == "}" {
@@ -161,18 +159,12 @@ impl<'a> Parser<'a> {
                             continue;
                         }
                         
-                        println!("False block line: {}", block_line);
                         false_block_lines.push(block_line);
                     } else {
-                        println!("True block line: {}", block_line);
                         true_block_lines.push(block_line);
                     }
                 }
                 
-                println!("True block: {:?}", true_block_lines.join(" ").trim());
-                println!("False block: {:?}", false_block_lines.join(" ").trim());
-
-
                 if condition_met {
                     if true_block_lines.is_empty() {
                         panic!("Empty true block");

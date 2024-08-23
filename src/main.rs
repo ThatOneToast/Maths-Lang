@@ -1,3 +1,5 @@
+use std::io::{self, Read};
+
 
 mod parser;
 mod expressions;
@@ -10,35 +12,18 @@ fn main() {
     println!("Welcome to Maths!");
     println!("When you are finished with your maths script, Unix: Ctrl+D, (Shitty) Windows: Ctrl+Z");
     
-    // loop {
+    loop {
         
-    //     let mut input = String::new();
+        let mut input = String::new();
     
-    //     print!("Maths> ");
-    //     io::stdin().read_to_string(&mut input)
-    //         .expect("Failed to read input");
+        print!("Maths> ");
+        io::stdin().read_to_string(&mut input)
+            .expect("Failed to read input");
         
-    //     let mut parser = parser::Parser::new(input.as_str());
-    //     parser.parse();
-    // }
+        let mut parser = parser::Parser::new(input.as_str());
+        parser.parse();
+    }
     
-    let file = r#"
-let result = 60 + 3
-        
-if result < 60 {
-    let result = 1
-} else {
-
-
-    let result = 0
-}
-                
-;result
-        "#;
-    
-    
-    let mut parser = parser::Parser::new(file);
-    parser.parse();
     
 }
 

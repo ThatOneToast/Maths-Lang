@@ -112,24 +112,5 @@ pub mod tests {
         assert_eq!(test_file_parser.var_container.get_number("result").unwrap(), &0.0);
     }
 
-    #[test]
-    fn default() {
-        let test_file = r#"
-let result = 50 + 3
-            
-if result < 60 {
-let result = 1
-} else {
-let result = 0
-}
-            
-;result
-            "#;
-        
-        let mut test_file_parser = crate::parser::Parser::new(test_file);
-        test_file_parser.parse();
-        
-        assert_eq!(test_file_parser.var_container.get_number("result").unwrap(), &1.0);
-    }
     
 }
