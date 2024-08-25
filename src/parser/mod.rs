@@ -18,6 +18,7 @@ impl<'a> Parser<'a> {
         let mut patterns = ppatterns.unwrap_or(HashMap::new()).clone();
         
         patterns.insert("Quadratic".to_string(), patterns::QUADRATIC.to_string());
+        patterns.insert("SqrRt".to_string(), patterns::SQUARE_ROOT.to_string());
         
         
         Self {
