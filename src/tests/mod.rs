@@ -184,4 +184,37 @@ let result = @Volume(height,width,length)
             &1000.0
         );
     }
+    
+
+    #[test]
+    fn standard_lib_sqrt() {
+        let test_file = r#"
+let result = @SqrRt(16)
+            "#;
+        
+        let mut test_file_parser = crate::parser::Parser::new(test_file, Option::from(HashMap::new()));
+        test_file_parser.parse();
+
+        assert_eq!(
+            test_file_parser.var_container.get_number("result").unwrap(),
+            &4.0
+        );
+    }
+    
+    #[test]
+    fn standard_lib_quadratic() {
+        let test_file = r#"
+let result = @Quadratic(1,2,3,4)
+
+;result
+            "#;
+        
+        let mut test_file_parser = crate::parser::Parser::new(test_file, Option::from(HashMap::new()));
+        test_file_parser.parse();
+
+        assert_eq!(
+            test_file_parser.var_container.get_number("result").unwrap(),
+            &27.0
+        );
+    }
 }
