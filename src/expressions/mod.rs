@@ -18,7 +18,6 @@ enum Token {
 fn tokenize(input: &str) -> Vec<Token> {
     let mut tokens = Vec::new();
     let mut chars = input.chars().peekable();
-    println!("Input: {}", input);
 
     while let Some(ch) = chars.next() {
         match ch {

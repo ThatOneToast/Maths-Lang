@@ -2,8 +2,9 @@ use std::collections::HashMap;
 
 use types::VariableContainer;
 
-use crate::expressions::evaluate_expression;
+use crate::{expressions::evaluate_expression, remove_whitespace};
 pub mod types;
+mod patterns;
 
 pub struct Parser<'a> {
     pub contents: &'a str,
@@ -13,11 +14,15 @@ pub struct Parser<'a> {
 
 
 impl<'a> Parser<'a> {
-    pub fn new(contents: &'a str, patterns: Option<HashMap<String, String>>) -> Self {
+    pub fn new(contents: &'a str, ppatterns: Option<HashMap<String, String>>) -> Self {
+        let mut patterns = ppatterns.unwrap_or(HashMap::new()).clone();
+        
+        patterns.insert("Quadratic".to_string(), patterns::QUADRATIC.to_string());
+        
         
         Self {
             contents,
-            patterns: patterns.unwrap_or(HashMap::new()),
+            patterns,
             var_container: VariableContainer::new(),
         }
     }
@@ -96,9 +101,6 @@ impl<'a> Parser<'a> {
         self.var_container.get_number(token).is_some()
     }
     
-    fn is_pattern(&self, token: &str) -> bool {
-        self.patterns.get(token).is_some()
-    }
 
     fn evaluate_condition(&self, condition_tokens: &[&str], num_vars: &HashMap<String, f64>) -> bool {
         let final_tokens = condition_tokens
@@ -112,7 +114,6 @@ impl<'a> Parser<'a> {
             })
             .collect::<Vec<String>>();
 
-        println!("Condition tokens: {:?}", final_tokens);
 
         let expression = final_tokens.join(" ");
         let result = evaluate_expression(&expression);
@@ -132,20 +133,23 @@ impl<'a> Parser<'a> {
         if self.is_let_statement(line, tokens.clone()) {
             let variable_name = tokens[1];
             
-            println!("Tokenss {:?}", tokens);
-            
+            // collect all remaining tokens if its a space skip
             let mut remaining_tokens = tokens[2..]
                 .iter()
-                .map(|s| s.trim().to_string())
+                .map(|s| remove_whitespace!(s).to_string())
                 .collect::<Vec<String>>();
+            
 
             for (_, token) in remaining_tokens.iter_mut().enumerate() {
                 
                 if token.starts_with("@") {
-                    let (pattern_name, mut passed_params) = token.strip_prefix("@").unwrap().split_once("(").unwrap();
-                    println!("Pattern name: {}", pattern_name);
+                    let tokenn = remove_whitespace!(token).to_string();
+                    
+                    let (pattern_name, mut passed_params) = tokenn.strip_prefix("@").unwrap()
+                        .split_once("(")
+                        .unwrap();
+                    
                     passed_params = passed_params.strip_suffix(")").unwrap();
-                    println!("Passed params: {}", passed_params);
                     
                     let pre_passed_params_list = passed_params.split(",").collect::<Vec<&str>>();
                     let mut passed_params_list: Vec<String> = Vec::new();
@@ -168,12 +172,10 @@ impl<'a> Parser<'a> {
                     }
                     
                     let mut pattern_parser = Parser::new(pattern_content, Option::from(self.patterns.clone()));
-                    
-                    
                     let mut cursor: usize = 0;
                     for param in pattern_params {
-                        let param_value_int = passed_params_list.get(cursor).unwrap().parse::<u8>().unwrap();
-                        pattern_parser.var_container.numbers.insert(param.clone(), param_value_int as f64);
+                        let param_value_int = passed_params_list.get(cursor).unwrap().parse::<f64>().unwrap();
+                        pattern_parser.var_container.numbers.insert(param.clone(), param_value_int);
                         cursor += 1;
                         
                     }
@@ -182,7 +184,6 @@ impl<'a> Parser<'a> {
                     let pattern_result = pattern_parser.var_container.get_number("result").unwrap();
                     *token = pattern_result.to_string();
                         
-                    
                 }
                 
                 if self.is_variable(token) {
@@ -290,7 +291,5 @@ impl<'a> Parser<'a> {
             }
         }
 
-        let result_value = self.var_container.get_number("result").unwrap_or(&0.0);
-        println!("Result: {}", result_value);
     }
 }

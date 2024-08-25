@@ -1,7 +1,5 @@
 
-let height = 10
-let width = 10
-let length = 10
-let result = @Volume(height,width,length)
 
-;result
+let volume = @Volume(3,3,3)
+
+;volume

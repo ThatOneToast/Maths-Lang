@@ -41,12 +41,14 @@ fn main() {
         }
     }
     
-    println!("Maths files: {:?}", maths_files);
 
     let args: Vec<String> = env::args().collect();
 
     let mut arg_count = 1;
     let file_path = &args[arg_count];
+    
+    
+    
     let content = fs::read_to_string(file_path)
         .expect("Failed to read the file");
 
@@ -68,4 +70,15 @@ fn main() {
         
     
     parser.parse();
+}
+
+
+#[macro_export]
+macro_rules! remove_whitespace {
+    ($s:expr) => {
+        $s
+            .chars()
+            .filter(|c| !c.is_whitespace())
+            .collect::<String>()
+    };
 }
