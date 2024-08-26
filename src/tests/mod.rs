@@ -217,4 +217,56 @@ let result = @Quadratic(1,2,3,4)
             &27.0
         );
     }
+    
+    
+    #[test]
+    fn loop_statement() {
+        let test_file = r#"
+        
+let num = 0
+
+loop 10 
+    let num = num + 1
+    
+    ;num
+loop_end
+    "#;
+        
+        let mut test_file_parser = crate::parser::Parser::new(test_file, Option::from(HashMap::new()));
+        test_file_parser.parse();
+
+        assert_eq!(
+            test_file_parser.var_container.get_number("num").unwrap(),
+            &10.0
+        );
+    }
+    
+    #[test]
+    fn loop_break_statement() {
+        let test_file = r#"
+        
+let num = 0
+
+loop 10 
+
+if num == 5 {
+    break
+}
+
+let num = num + 1
+
+;num
+
+loop_end
+        "#;
+        
+        let mut test_file_parser = crate::parser::Parser::new(test_file, Option::from(HashMap::new()));
+        test_file_parser.parse();
+
+        assert_eq!(
+            test_file_parser.var_container.get_number("num").unwrap(),
+            &5.0
+        );
+    }
+        
 }

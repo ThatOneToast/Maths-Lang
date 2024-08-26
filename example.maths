@@ -1,5 +1,11 @@
-#[x]
 
-let root = @SqrRt(x)
+let num = 0
 
-;root
+loop 10 
+
+    let num = num + 1
+
+    
+    ;num
+    
+loop_end
