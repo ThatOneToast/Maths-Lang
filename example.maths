@@ -1,11 +1,11 @@
-
 let num = 0
 
-loop 10 
+loop 90000000
 
     let num = num + 1
 
-    
     ;num
     
+    
+
 loop_end

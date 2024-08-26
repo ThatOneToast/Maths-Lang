@@ -7,6 +7,7 @@ use crate::{expressions::evaluate_expression, remove_whitespace};
 mod patterns;
 pub mod results;
 pub mod types;
+mod helpers;
 
 pub struct Parser<'a> {
     pub contents: &'a str,
@@ -268,7 +269,10 @@ impl<'a> Parser<'a> {
                 if let Some(next_line) = lines_iter.next() {
                     if next_line.trim() == "{" {
                         continue;
-                    } else if next_line.trim() == "}" {
+                    } else if next_line.trim() == "} else {" {
+                        continue;
+                    }
+                    else if next_line.trim() == "}" {
                         break;
                     }
                 }
@@ -276,9 +280,6 @@ impl<'a> Parser<'a> {
             
 
             if in_false_block {
-                if block_line.trim() == "} else {" {
-                    continue;
-                }
                 false_block_lines.push(block_line.trim());
             } else {
                 true_block_lines.push(block_line.trim());
@@ -347,13 +348,10 @@ impl<'a> Parser<'a> {
                     if line.trim().starts_with("loop") {
                         panic!("Loops can't be nested");
                     }
-                    
-
-
                     loop_block_lines.push(line.trim().to_string());
                 }
 
-                'outer: for index in 0..loop_count {
+                'outer: for _ in 0..loop_count {
                     for block_line in &loop_block_lines {
 
                         match self.parse_line(block_line.as_str()).unwrap() {
