@@ -46,7 +46,7 @@ impl<'a> Parser<'a> {
             Ok(new_params)
             
         } else {
-            Err("This maths doesn't contain any context of paramaters".to_string())
+            Err("This maths doesn't contain any context of paramaters TOP OF LINE: #[params, params1]".to_string())
         }
         
     }
@@ -72,7 +72,7 @@ impl<'a> Parser<'a> {
             new_params
             
         } else {
-            panic!("This maths doesn't contain any context of paramaters");
+            panic!("This maths doesn't contain any context of paramaters TOP OF LINE: #[params, params1]");
         }
         
     }
@@ -90,8 +90,9 @@ impl<'a> Parser<'a> {
 
         if variable_name.is_empty() {
             panic!(
-                "Let statement must be followed by a variable name, see {}",
-                line
+                "Let statement must be followed by a variable name, see {} \n {}",
+                line,
+                "let example = 50"
             );
         }
 

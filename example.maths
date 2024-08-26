@@ -1,5 +1,5 @@
+#[x]
 
-
-let root = @SqrRt(12)
+let root = @SqrRt(x)
 
 ;root

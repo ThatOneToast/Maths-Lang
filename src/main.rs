@@ -22,7 +22,6 @@ fn main() {
     
     let mut maths_files: HashMap<String, String> = HashMap::new();
     
-    
     for maths_file in maths_dir {
         let maths_file = maths_file.unwrap();
         let maths_file_path = maths_file.path();
@@ -43,33 +42,45 @@ fn main() {
     
 
     let args: Vec<String> = env::args().collect();
+    
+    if args.len() == 1 {
+        panic!("No file path provided - Maths path/to/file.maths");
+    }
 
     let mut arg_count = 1;
+    
     let file_path = &args[arg_count];
-    
-    
     
     let content = fs::read_to_string(file_path)
         .expect("Failed to read the file");
 
     let mut parser = parser::Parser::new(content.as_str(), Option::from(maths_files));
+    let paramater_names = parser.get_paramater_names();
     
-    if args.len() > 2 {
-        let paramater_names = parser.get_paramater_names().unwrap();
-        
-        for param in paramater_names {
-            arg_count += 1;
+    match paramater_names {
+        Ok(param_names) => {
+            let param_size = param_names.len() + 2; // add additional 2 for the current dir and file path
             
+            if args.len() != param_size {
+                panic!("Expected {} argument(s), but got {} ", param_size - 2, args.len() - 2);
+            }
             
-            let arg_value =  args[arg_count].parse::<f64>()
-                .expect("Failed to parse argument");
-            
-            parser.var_container.numbers.insert(param.to_string(), arg_value);
+            for param in param_names {
+                arg_count += 1;
+                
+                
+                let arg_value =  args[arg_count].parse::<f64>()
+                    .expect("Failed to parse argument");
+                
+                parser.var_container.numbers.insert(param.to_string(), arg_value);
+            }
+        }
+        Err(_) => {
+            parser.parse();
         }
     }
-        
     
-    parser.parse();
+    
 }
 
 
