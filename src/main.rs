@@ -1,11 +1,8 @@
 use std::{collections::HashMap, env, fs, path::PathBuf};
 
-
-
 mod parser;
 mod expressions;
 mod tests;
-
 
 fn main() {
     
