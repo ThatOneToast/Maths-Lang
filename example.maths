@@ -1,11 +1,9 @@
 let num = 0
 
-loop 90000000
+loop 5 
 
     let num = num + 1
 
     ;num
-    
-    
 
 loop_end

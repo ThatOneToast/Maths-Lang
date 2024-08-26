@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env, fs, io::{self, Read}, path::PathBuf};
+use std::{collections::HashMap, env, fs, io::{self, Read}, path::PathBuf, process};
 
 mod parser;
 mod expressions;
@@ -48,11 +48,6 @@ fn main() {
     
     let file_path = &args[arg_count];
     
-    if file_path == "interp" {
-        // the next argument is a multiline string
-        let mut content = String::new();
-    }
-    
     let content = if file_path == "interp" {
             // Read multi-line input from stdin
             println!("Enter your Maths Lang code (Press Ctrl+D or Ctrl+Z to end input):");
@@ -89,6 +84,9 @@ fn main() {
         }
     }
     
+    let result_value = parser.var_container.numbers.get("result").unwrap_or(&0.0).to_string();
+    
+    println!("result={}", result_value);
     
 }
 
