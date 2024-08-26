@@ -1,5 +1,5 @@
 # Maths - A new way to do math 🧮
-[![Rust](https://github.com/ThatOneToast/Maths-Lang/actions/workflows/rust.yml/badge.svg)](https://github.com/ThatOneToast/Maths-Lang/actions/workflows/rust.yml)
+[![Maths](https://github.com/ThatOneToast/Maths-Lang/actions/workflows/rust.yml/badge.svg)](https://github.com/ThatOneToast/Maths-Lang/actions/workflows/rust.yml)
 
 Maths is a simple expressive language for performing mathmatical operations
 and calculations. 
