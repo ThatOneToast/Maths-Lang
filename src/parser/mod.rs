@@ -17,14 +17,16 @@ pub struct Parser<'a> {
 
 impl<'a> Parser<'a> {
     pub fn new(contents: &'a str, ppatterns: Option<HashMap<String, String>>) -> Self {
-        let mut patterns = ppatterns.unwrap_or(HashMap::new()).clone();
+        let patterns = patterns::PATTERNS.clone();
+        let constructed_patterns = patterns.iter()
+            .map(|(_, pattern)| pattern.construct()).collect::<HashMap<String, String>>();
 
-        patterns.insert("Quadratic".to_string(), patterns::QUADRATIC.to_string());
-        patterns.insert("SqrRt".to_string(), patterns::SQUARE_ROOT.to_string());
-
+        let mut final_patterns = ppatterns.unwrap_or(HashMap::new()).clone();
+        final_patterns.extend(constructed_patterns);
+        
         Self {
             contents,
-            patterns,
+            patterns: final_patterns,
             var_container: VariableContainer::new(),
         }
     }

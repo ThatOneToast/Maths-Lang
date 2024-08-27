@@ -1,9 +1,5 @@
-let num = 0
 
-loop 5 
 
-    let num = num + 1
+let cube = @CubeRt(27)
 
-    ;num
-
-loop_end
+;cube
