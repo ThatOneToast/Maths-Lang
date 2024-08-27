@@ -4,6 +4,8 @@
 Maths is a simple expressive language for performing mathmatical operations
 and calculations. 
 
+- Need this anywhere? Check out the [Maths API](https://github.com/ThatOneToast/Maths-Lang-API)
+
 ## Features ⚡️
 
 * Variable Assignment: Using the `let` keyword create variables that can store expressions or values.
