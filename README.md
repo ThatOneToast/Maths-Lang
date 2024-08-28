@@ -66,7 +66,6 @@ if cond1 > cond2 {
 ```
 
 
-Currently Loops cannot contain if statements.
 - Loops:
 ```maths
 let num = 0
@@ -74,6 +73,14 @@ let num = 0
 loop 10
 
     let num = num + 1
+    
+    if num == 5 {
+    
+        break
+    } else {
+    
+        continue
+    }
     
     ;num
     
