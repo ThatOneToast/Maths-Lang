@@ -1,4 +1,7 @@
 [package]
-name = "Maths"
+name = "maths"
 version = "0.1.5"
 edition = "2021"
+
+[dependencies]
+colored = "2.1.0"

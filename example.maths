@@ -1,5 +1,3 @@
+#[add1, add2]
 
-
-let cube = @CubeRt(27)
-
-;cube
+let result = add1 + add2

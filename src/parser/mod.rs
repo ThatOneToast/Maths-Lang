@@ -4,7 +4,7 @@ use results::Results;
 use types::VariableContainer;
 
 use crate::{expressions::evaluate_expression, remove_whitespace};
-mod patterns;
+pub mod patterns;
 pub mod results;
 pub mod types;
 mod helpers;

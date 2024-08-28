@@ -26,9 +26,9 @@ pub static PATTERNS: LazyLock<HashMap<String, Pattern>> = LazyLock::new(|| {
 
 #[derive(Debug, Clone)]
 pub struct Pattern {
-    name: String,
-    context_params: Vec<String>,
-    content: String
+    pub name: String,
+    pub context_params: Vec<String>,
+    pub content: String
 }
 
 impl Pattern {
@@ -48,6 +48,16 @@ impl Pattern {
         builder.push_str(&format!("#[{}]\n", self.context_params.join(", ")));
         builder.push_str(&self.content);
         (self.name.to_owned(), builder)
+    }
+    
+    
+    pub fn construct_use_example(&self) -> String {
+        let mut builder = String::new();
+        for param in &self.context_params {
+            builder.push_str(&format!("let {} = 10\n", param));
+        }
+        builder.push_str(&format!("let result = @{}({})", self.name, self.context_params.join(", ")));
+        builder
     }
 }
     

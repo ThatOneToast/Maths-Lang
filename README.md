@@ -20,6 +20,15 @@ Notes:
 To create a pattern for functions, create a new maths file, use context paramaters to pass in the required parameters, 
 do your calculations, the final variable checked for final result is `result`.
 These patterns must be placed in the .maths folder in your users home directory. 
+
+## Commands ❔
+- `maths [file]` - Run a maths file
+- `maths interp` - Opens the interpreter.
+- `maths std` or `maths standard` - Prints out all standard lib functions, including local patterns.
+- `maths std-local` or `maths standard-local` - Prints out all local patterns.
+- `maths padd [file]` - Adds a pattern to your local patterns.
+- `maths premove [funcName]` - Removes a pattern from your local patterns.
+
 ## Examples 📝
 
 - Context Parameters: (Volume)
