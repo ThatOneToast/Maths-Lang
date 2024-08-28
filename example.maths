@@ -1,3 +1,19 @@
-#[add1, add2]
 
-let result = add1 + add2
+
+let num = 0
+
+loop 10
+    
+    if num == 6 {
+        let result = 6
+        break
+    } else {
+    
+        continue
+    }
+    
+    let num = num + 1
+
+    
+    ;num
+    

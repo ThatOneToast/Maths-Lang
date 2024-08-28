@@ -4,10 +4,10 @@ use results::Results;
 use types::VariableContainer;
 
 use crate::{expressions::evaluate_expression, remove_whitespace};
+mod helpers;
 pub mod patterns;
 pub mod results;
 pub mod types;
-mod helpers;
 
 pub struct Parser<'a> {
     pub contents: &'a str,
@@ -18,12 +18,14 @@ pub struct Parser<'a> {
 impl<'a> Parser<'a> {
     pub fn new(contents: &'a str, ppatterns: Option<HashMap<String, String>>) -> Self {
         let patterns = patterns::PATTERNS.clone();
-        let constructed_patterns = patterns.iter()
-            .map(|(_, pattern)| pattern.construct()).collect::<HashMap<String, String>>();
+        let constructed_patterns = patterns
+            .iter()
+            .map(|(_, pattern)| pattern.construct())
+            .collect::<HashMap<String, String>>();
 
         let mut final_patterns = ppatterns.unwrap_or(HashMap::new()).clone();
         final_patterns.extend(constructed_patterns);
-        
+
         Self {
             contents,
             patterns: final_patterns,
@@ -109,7 +111,11 @@ impl<'a> Parser<'a> {
         line.starts_with("if") || line.starts_with("???")
     }
 
-    fn evaluate_condition(&self, condition_tokens: &[&str], num_vars: &HashMap<String, f64>) -> bool {
+    fn evaluate_condition(
+        &self,
+        condition_tokens: &[&str],
+        num_vars: &HashMap<String, f64>,
+    ) -> bool {
         let final_tokens = condition_tokens
             .into_iter()
             .map(|token| {
@@ -133,7 +139,11 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_line(&mut self, line: &str) -> Result<Results, String> {
+    fn parse_line(
+        &mut self,
+        line: &str,
+        iterator: Option<&mut Peekable<std::str::Lines<'_>>>,
+    ) -> Result<Results, String> {
         let tokens: Vec<&str> = line.split_whitespace().collect();
 
         if self.is_let_statement(line, tokens.clone()) {
@@ -208,22 +218,11 @@ impl<'a> Parser<'a> {
                 .numbers
                 .insert(variable_name.to_string(), eval_expr);
         } else if self.is_if_statement(line) {
-            let lines = self.contents.lines();
-            let mut content_lines = lines.into_iter().peekable();
-            
-            while let Some(tline) = content_lines.next() {
-                if tline.to_owned() != line {
-                    content_lines.next();
-                } else {
-                    break
-                }
+            let result = self.process_if_statement(line, iterator.unwrap()).unwrap();
+            if result == Results::BREAK {
+                return Ok(result);
             }
-            
-            
-            self.process_if_statement(line, &mut content_lines)
-            
-        }
-        else if line.starts_with(";") {
+        } else if line.starts_with(";") {
             let var_name = line.strip_prefix(";").unwrap_or("");
 
             let var_value = self
@@ -233,16 +232,20 @@ impl<'a> Parser<'a> {
                 .expect(&format!("Undefined variable: {} Line: {}", var_name, line));
 
             println!("{}: {}", var_name, var_value);
-        } else if line.starts_with("break") {
+        } else if line.starts_with("break") || line.starts_with("BREAK") {
             return Ok(Results::BREAK);
-        } else if line.starts_with("continue") {
+        } else if line.starts_with("continue") || line.starts_with("CONTINUE") {
             return Ok(Results::CONTINUE);
         }
 
         Ok(Results::OK)
     }
 
-    fn process_if_statement(&mut self, line: &str, lines_iter: &mut Peekable<std::str::Lines<'_>>) {
+    fn process_if_statement(
+        &mut self,
+        line: &str,
+        lines_iter: &mut Peekable<std::str::Lines<'_>>,
+    ) -> Result<Results, String> {
         let tokens = line.split_whitespace().collect::<Vec<&str>>();
         let condition_tokens = &tokens[1..tokens.len() - 1];
         let condition_met = self.evaluate_condition(condition_tokens, &self.var_container.numbers);
@@ -250,7 +253,6 @@ impl<'a> Parser<'a> {
         let mut true_block_lines: Vec<&str> = Vec::new();
         let mut false_block_lines: Vec<&str> = Vec::new();
         let mut in_false_block = false;
-        
 
         while let Some(block_line) = lines_iter.next() {
             let block_line_trimmed = block_line.trim();
@@ -273,13 +275,11 @@ impl<'a> Parser<'a> {
                         continue;
                     } else if next_line.trim() == "} else {" {
                         continue;
-                    }
-                    else if next_line.trim() == "}" {
+                    } else if next_line.trim() == "}" {
                         break;
                     }
                 }
             }
-            
 
             if in_false_block {
                 false_block_lines.push(block_line.trim());
@@ -287,22 +287,30 @@ impl<'a> Parser<'a> {
                 true_block_lines.push(block_line.trim());
             }
         }
-        
+
         if condition_met {
             if true_block_lines.is_empty() {
                 panic!("Empty true block");
             }
             for block_line in true_block_lines {
-                self.parse_line(block_line).unwrap();
+                let result = self.parse_line(block_line, None).unwrap();
+                if result == Results::BREAK || result == Results::CONTINUE {
+                    return Ok(result);
+                }
             }
         } else {
             if false_block_lines.is_empty() {
                 panic!("Empty false block");
             }
             for block_line in false_block_lines {
-                self.parse_line(block_line).unwrap();
+                let result = self.parse_line(block_line, None).unwrap();
+                if result == Results::BREAK || result == Results::CONTINUE {
+                    return Ok(result);
+                } 
             }
         }
+
+        Ok(Results::OK)
     }
 
     pub fn parse(&mut self) {
@@ -315,10 +323,7 @@ impl<'a> Parser<'a> {
                 continue;
             }
 
-            if self.is_if_statement(line) {
-                println!("Processing if statement");
-                self.process_if_statement(line, &mut lines_iter)
-            } else if line.starts_with("loop") || line.starts_with("LOOP") {
+            if line.starts_with("loop") || line.starts_with("LOOP") {
                 let mut loop_iter = tokens.iter().peekable();
                 loop_iter.next();
                 let current_token = loop_iter.next().unwrap();
@@ -353,19 +358,24 @@ impl<'a> Parser<'a> {
                 }
 
                 'outer: for _ in 0..loop_count {
-                    for block_line in &loop_block_lines {
-
-                        match self.parse_line(block_line.as_str()).unwrap() {
+                    let lines = loop_block_lines.join("\n");
+                    let mut blines_iter = lines.lines().into_iter().peekable();
+                    while let Some(block_line) = blines_iter.next() {
+                        match self.parse_line(block_line, 
+                            Option::from(&mut blines_iter))
+                        .unwrap()
+                        {
                             Results::BREAK => {
                                 break 'outer;
                             }
                             _ => {}
                         }
                     }
-                    
                 }
             } else {
-                let _ = self.parse_line(line).unwrap();
+                let _ = self
+                    .parse_line(line, Option::from(&mut lines_iter))
+                    .unwrap();
             }
         }
     }

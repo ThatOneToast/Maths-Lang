@@ -251,6 +251,9 @@ loop 10
 
 if num == 5 {
     break
+} else {
+
+    continue
 }
 
 let num = num + 1
