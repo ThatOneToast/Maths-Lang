@@ -320,10 +320,9 @@ impl<'a> Parser<'a> {
                 self.process_if_statement(line, &mut lines_iter)
             } else if line.starts_with("loop") || line.starts_with("LOOP") {
                 let mut loop_iter = tokens.iter().peekable();
-                let mut current_token = loop_iter.next().unwrap();
-                current_token = loop_iter.next().unwrap();
-
-                let mut loop_count = 1;
+                loop_iter.next();
+                let current_token = loop_iter.next().unwrap();
+                let loop_count: u128;
 
                 if self.is_variable(&current_token) {
                     let num = self
